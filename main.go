@@ -88,6 +88,10 @@ func connectToRedis() (*redis.Client, error) {
 	return rdb, nil
 }
 
+func roundToTwoDecimals(number float64) float64 {
+	return math.Ceil(number * 100) / 100
+}
+
 func storePayment(p PaymentProcessorReq, processorID int) error {
 	requestedAt, err := time.Parse(RFC3339Milli, p.RequestedAt)
 	if err != nil {
@@ -405,6 +409,8 @@ func createPayment(c *fiber.Ctx) error {
 
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid JSON")
 	}
+
+	p.Amount = roundToTwoDecimals(p.Amount)
 
 	if p.CorrelationID == "" || p.Amount <= 0 {
 		log.Println("Missing or invalid payment fields")
